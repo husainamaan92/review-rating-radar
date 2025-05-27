@@ -1,26 +1,1137 @@
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>review-rating-radar</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Rating System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <meta property="og:title" content="review-rating-radar" />
-    <meta property="og:description" content="Lovable Generated Project" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            line-height: 1.6;
+        }
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
 
-  <body>
-    <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Product Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .product-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .rating-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stars {
+            display: flex;
+            gap: 0.125rem;
+        }
+
+        .star {
+            width: 16px;
+            height: 16px;
+            fill: #d1d5db;
+            transition: fill 0.2s ease;
+        }
+
+        .star.filled {
+            fill: #fbbf24;
+        }
+
+        .rating-number {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .review-count {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Review Page Styles */
+        .review-page {
+            display: none;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .back-btn:hover {
+            color: #1d4ed8;
+        }
+
+        .product-header {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .product-header img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+
+        .product-details h2 {
+            font-size: 1.5rem;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-details p {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .product-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .reviews-section {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .reviews-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+
+        .filter-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .filter-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-option:hover {
+            background: #f3f4f6;
+        }
+
+        .filter-option.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .filter-rating {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 60px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fbbf24;
+            transition: width 0.3s ease;
+        }
+
+        /* Reviews List */
+        .reviews-content {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .reviews-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sort-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .review-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .review-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .reviewer-details h4 {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .review-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .review-date {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .verified-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .review-comment {
+            color: #374151;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .review-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .helpful-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #f3f4f6;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .vote-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .vote-btn.active-helpful {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .vote-btn.active-not-helpful {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* Review Form */
+        .review-form {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .rating-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .char-count {
+            text-align: right;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-full {
+            flex: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state p {
+            color: #6b7280;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+
+        .interactive-star {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .interactive-star:hover {
+            transform: scale(1.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Products View -->
+        <div id="products-view">
+            <div class="header">
+                <h1>Product Rating System</h1>
+                <p>Discover what customers think about our products. Read genuine reviews and make informed decisions.</p>
+            </div>
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Reviews View -->
+        <div id="reviews-view" class="review-page">
+            <button class="back-btn" onclick="showProductsView()">← Back to Products</button>
+            
+            <div id="product-header" class="product-header">
+                <!-- Product header will be populated by JavaScript -->
+            </div>
+
+            <div id="review-form-container" class="hidden">
+                <!-- Review form will be populated by JavaScript -->
+            </div>
+
+            <div class="reviews-section">
+                <div class="filter-panel">
+                    <h3 class="filter-title">Filter by Rating</h3>
+                    <div id="rating-filters">
+                        <!-- Filters will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="reviews-content">
+                    <div class="reviews-header">
+                        <div class="reviews-controls">
+                            <h3 id="reviews-count">Customer Reviews (0)</h3>
+                            <select id="sort-select" class="sort-select">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="highest">Highest Rating</option>
+                                <option value="lowest">Lowest Rating</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="showReviewForm()">Write Review</button>
+                    </div>
+                    <div id="reviews-list">
+                        <!-- Reviews will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const sampleProducts = [
+            {
+                id: '1',
+                name: 'Wireless Bluetooth Headphones',
+                price: 99.99,
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+                averageRating: 4.2,
+                totalReviews: 128,
+                description: 'Premium wireless headphones with noise cancellation and 30-hour battery life.'
+            },
+            {
+                id: '2',
+                name: 'Smart Fitness Watch',
+                price: 199.99,
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop',
+                averageRating: 4.5,
+                totalReviews: 256,
+                description: 'Advanced fitness tracking with heart rate monitoring and GPS capabilities.'
+            },
+            {
+                id: '3',
+                name: 'USB-C Fast Charger',
+                price: 29.99,
+                image: 'https://images.unsplash.com/photo-1609592509749-8a5fbf5b0615?w=400&h=300&fit=crop',
+                averageRating: 4.7,
+                totalReviews: 89,
+                description: 'Ultra-fast charging adapter compatible with all USB-C devices.'
+            }
+        ];
+
+        let sampleReviews = [
+            {
+                id: '1',
+                productId: '1',
+                customerName: 'Sarah Johnson',
+                rating: 5,
+                comment: 'Absolutely love these headphones! The sound quality is incredible and the noise cancellation works perfectly. Worth every penny.',
+                date: '2024-01-15',
+                helpful: 12,
+                notHelpful: 1,
+                verified: true,
+                canDelete: true
+            },
+            {
+                id: '2',
+                productId: '1',
+                customerName: 'Mike Chen',
+                rating: 4,
+                comment: 'Great headphones overall. Battery life is excellent and they are very comfortable. Only minor complaint is that they can feel a bit heavy after long use.',
+                date: '2024-01-10',
+                helpful: 8,
+                notHelpful: 0,
+                verified: true,
+                canDelete: false
+            },
+            {
+                id: '3',
+                productId: '1',
+                customerName: 'Emily Davis',
+                rating: 3,
+                comment: 'Good quality but had some connectivity issues with my phone. Customer service was helpful though.',
+                date: '2024-01-08',
+                helpful: 3,
+                notHelpful: 2,
+                verified: false,
+                canDelete: false
+            },
+            {
+                id: '4',
+                productId: '2',
+                customerName: 'Alex Rodriguez',
+                rating: 5,
+                comment: 'This watch has completely changed my fitness routine. The heart rate monitoring is spot on and the GPS tracking is very accurate.',
+                date: '2024-01-12',
+                helpful: 15,
+                notHelpful: 0,
+                verified: true,
+                canDelete: false
+            },
+            {
+                id: '5',
+                productId: '2',
+                customerName: 'Lisa Thompson',
+                rating: 4,
+                comment: 'Really impressed with the build quality and features. The battery lasts for days and the interface is intuitive.',
+                date: '2024-01-09',
+                helpful: 7,
+                notHelpful: 1,
+                verified: true,
+                canDelete: false
+            }
+        ];
+
+        let currentProduct = null;
+        let selectedRating = null;
+        let sortBy = 'newest';
+        let userVotes = {}; // Track user votes: reviewId -> 'helpful'|'not-helpful'|null
+
+        // Initialize the app
+        function init() {
+            renderProducts();
+        }
+
+        // Render products grid
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = sampleProducts.map(product => `
+                <div class="product-card" onclick="viewReviews('${product.id}')">
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                        <div class="price-badge">$${product.price}</div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="rating-info">
+                            <div class="rating-display">
+                                ${renderStars(product.averageRating)}
+                                <span class="rating-number">${product.averageRating.toFixed(1)}</span>
+                            </div>
+                            <span class="review-count">(${product.totalReviews} reviews)</span>
+                        </div>
+                        <button class="btn">View Reviews</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render star rating
+        function renderStars(rating, interactive = false, onStarClick = null) {
+            const stars = [];
+            for (let i = 1; i <= 5; i++) {
+                const filled = i <= rating ? 'filled' : '';
+                const interactiveClass = interactive ? 'interactive-star' : '';
+                const clickHandler = interactive && onStarClick ? `onclick="${onStarClick}(${i})"` : '';
+                stars.push(`
+                    <svg class="star ${filled} ${interactiveClass}" ${clickHandler} viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                `);
+            }
+            return `<div class="stars">${stars.join('')}</div>`;
+        }
+
+        // View reviews for a product
+        function viewReviews(productId) {
+            currentProduct = sampleProducts.find(p => p.id === productId);
+            selectedRating = null;
+            
+            document.getElementById('products-view').style.display = 'none';
+            document.getElementById('reviews-view').style.display = 'block';
+            
+            renderProductHeader();
+            renderRatingFilters();
+            renderReviews();
+        }
+
+        // Show products view
+        function showProductsView() {
+            document.getElementById('reviews-view').style.display = 'none';
+            document.getElementById('products-view').style.display = 'block';
+            hideReviewForm();
+        }
+
+        // Render product header
+        function renderProductHeader() {
+            const header = document.getElementById('product-header');
+            header.innerHTML = `
+                <img src="${currentProduct.image}" alt="${currentProduct.name}">
+                <div class="product-details">
+                    <h2>${currentProduct.name}</h2>
+                    <p>${currentProduct.description}</p>
+                    <div class="product-meta">
+                        ${renderStars(currentProduct.averageRating)}
+                        <span class="rating-number">${currentProduct.averageRating.toFixed(1)}</span>
+                        <span class="review-count">(${currentProduct.totalReviews} reviews)</span>
+                        <span class="product-price">$${currentProduct.price}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render rating filters
+        function renderRatingFilters() {
+            const productReviews = getProductReviews();
+            const ratingsDistribution = getRatingsDistribution(productReviews);
+            const totalReviews = productReviews.length;
+            
+            const filters = document.getElementById('rating-filters');
+            filters.innerHTML = `
+                <button class="filter-option ${selectedRating === null ? 'active' : ''}" onclick="filterByRating(null)">
+                    <div class="filter-rating">
+                        <span>All Ratings</span>
+                        <span>(${totalReviews})</span>
+                    </div>
+                </button>
+                ${[5, 4, 3, 2, 1].map(rating => {
+                    const count = ratingsDistribution[rating] || 0;
+                    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                    return `
+                        <button class="filter-option ${selectedRating === rating ? 'active' : ''}" onclick="filterByRating(${rating})">
+                            <div class="filter-rating">
+                                <div class="filter-left">
+                                    ${renderStars(rating)}
+                                    <span>(${count})</span>
+                                </div>
+                                <div class="filter-right">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                                    </div>
+                                    <span style="width: 30px; text-align: right; font-size: 0.75rem;">${percentage.toFixed(0)}%</span>
+                                </div>
+                            </div>
+                        </button>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        // Get reviews for current product
+        function getProductReviews() {
+            return sampleReviews.filter(r => r.productId === currentProduct.id);
+        }
+
+        // Get ratings distribution
+        function getRatingsDistribution(reviews) {
+            return reviews.reduce((acc, review) => {
+                acc[review.rating] = (acc[review.rating] || 0) + 1;
+                return acc;
+            }, {});
+        }
+
+        // Filter reviews by rating
+        function filterByRating(rating) {
+            selectedRating = rating;
+            renderRatingFilters();
+            renderReviews();
+        }
+
+        // Sort reviews
+        function sortReviews() {
+            sortBy = document.getElementById('sort-select').value;
+            renderReviews();
+        }
+
+        // Render reviews
+        function renderReviews() {
+            let reviews = getProductReviews();
+            
+            // Filter by rating
+            if (selectedRating) {
+                reviews = reviews.filter(r => r.rating === selectedRating);
+            }
+            
+            // Sort reviews
+            reviews.sort((a, b) => {
+                switch (sortBy) {
+                    case 'newest':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'oldest':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'highest':
+                        return b.rating - a.rating;
+                    case 'lowest':
+                        return a.rating - b.rating;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Update count
+            document.getElementById('reviews-count').textContent = `Customer Reviews (${reviews.length})`;
+            
+            // Render reviews list
+            const reviewsList = document.getElementById('reviews-list');
+            if (reviews.length === 0) {
+                reviewsList.innerHTML = `
+                    <div class="empty-state">
+                        <p>${selectedRating 
+                            ? `No reviews found with ${selectedRating} star${selectedRating > 1 ? 's' : ''}` 
+                            : 'No reviews yet. Be the first to write one!'
+                        }</p>
+                        ${!selectedRating ? '<button class="btn" onclick="showReviewForm()">Write First Review</button>' : ''}
+                    </div>
+                `;
+            } else {
+                reviewsList.innerHTML = reviews.map(review => renderReviewCard(review)).join('');
+            }
+        }
+
+        // Render individual review card
+        function renderReviewCard(review) {
+            const userVote = userVotes[review.id];
+            return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">
+                                ${review.customerName.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="reviewer-details">
+                                <h4>${review.customerName}</h4>
+                                <div class="review-meta">
+                                    ${renderStars(review.rating)}
+                                    <span class="review-date">${review.date}</span>
+                                    ${review.verified ? '<span class="verified-badge">Verified Purchase</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${review.canDelete ? `
+                            <button class="delete-btn" onclick="deleteReview('${review.id}')" title="Delete review">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                    <p class="review-comment">${review.comment}</p>
+                    <div class="review-actions">
+                        <span class="helpful-text">Was this helpful?</span>
+                        <button class="vote-btn ${userVote === 'helpful' ? 'active-helpful' : ''}" 
+                                onclick="vote('${review.id}', 'helpful')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 10v12l4-4h7a2 2 0 002-2V8a2 2 0 00-2-2H11l-4-4z"/>
+                            </svg>
+                            <span>${review.helpful}</span>
+                        </button>
+                        <button class="vote-btn ${userVote === 'not-helpful' ? 'active-not-helpful' : ''}" 
+                                onclick="vote('${review.id}', 'not-helpful')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="transform: rotate(180deg)">
+                                <path d="M7 10v12l4-4h7a2 2 0 002-2V8a2 2 0 00-2-2H11l-4-4z"/>
+                            </svg>
+                            <span>${review.notHelpful}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Vote on review helpfulness
+        function vote(reviewId, voteType) {
+            const review = sampleReviews.find(r => r.id === reviewId);
+            const currentVote = userVotes[reviewId];
+            
+            if (currentVote === voteType) {
+                // Remove vote
+                if (voteType === 'helpful') {
+                    review.helpful--;
+                } else {
+                    review.notHelpful--;
+                }
+                userVotes[reviewId] = null;
+            } else {
+                // Change or add vote
+                if (currentVote === 'helpful') {
+                    review.helpful--;
+                    review.notHelpful++;
+                } else if (currentVote === 'not-helpful') {
+                    review.notHelpful--;
+                    review.helpful++;
+                } else {
+                    if (voteType === 'helpful') {
+                        review.helpful++;
+                    } else {
+                        review.notHelpful++;
+                    }
+                }
+                userVotes[reviewId] = voteType;
+            }
+            
+            renderReviews();
+        }
+
+        // Delete review
+        function deleteReview(reviewId) {
+            if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+                sampleReviews = sampleReviews.filter(r => r.id !== reviewId);
+                renderRatingFilters();
+                renderReviews();
+            }
+        }
+
+        // Show review form
+        function showReviewForm() {
+            const container = document.getElementById('review-form-container');
+            container.className = '';
+            container.innerHTML = `
+                <div class="review-form">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600;">Write a Review</h3>
+                    <form onsubmit="submitReview(event)">
+                        <div class="form-group">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" id="reviewer-name" class="form-input" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rating</label>
+                            <div class="rating-selector">
+                                ${renderStars(0, true, 'setRating')}
+                                <span id="rating-text" class="rating-text">Click to rate</span>
+                            </div>
+                            <input type="hidden" id="review-rating" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your Review</label>
+                            <textarea id="review-comment" class="form-input form-textarea" 
+                                     placeholder="Share your experience with this product..." 
+                                     maxlength="500" required oninput="updateCharCount()"></textarea>
+                            <div id="char-count" class="char-count">0/500 characters</div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-full">Submit Review</button>
+                            <button type="button" class="btn btn-secondary btn-full" onclick="hideReviewForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        // Hide review form
+        function hideReviewForm() {
+            document.getElementById('review-form-container').className = 'hidden';
+        }
+
+        // Set rating in form
+        function setRating(rating) {
+            document.getElementById('review-rating').value = rating;
+            document.getElementById('rating-text').textContent = `${rating} out of 5 stars`;
+            
+            // Update star display
+            const stars = document.querySelectorAll('#review-form-container .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const textarea = document.getElementById('review-comment');
+            const charCount = document.getElementById('char-count');
+            charCount.textContent = `${textarea.value.length}/500 characters`;
+        }
+
+        // Submit review
+        function submitReview(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('reviewer-name').value.trim();
+            const rating = parseInt(document.getElementById('review-rating').value);
+            const comment = document.getElementById('review-comment').value.trim();
+            
+            if (!name || !rating || !comment) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Create new review
+            const newReview = {
+                id: Date.now().toString(),
+                productId: currentProduct.id,
+                customerName: name,
+                rating: rating,
+                comment: comment,
+                date: new Date().toISOString().split('T')[0],
+                helpful: 0,
+                notHelpful: 0,
+                verified: false,
+                canDelete: true // New reviews can be deleted by the user
+            };
+            
+            // Add to reviews array
+            sampleReviews.unshift(newReview);
+            
+            // Hide form and refresh views
+            hideReviewForm();
+            renderRatingFilters();
+            renderReviews();
+        }
+
+        // Event listeners
+        document.getElementById('sort-select').addEventListener('change', sortReviews);
+
+        // Initialize the app
+        init();
+    </script>
+</body>
 </html>
