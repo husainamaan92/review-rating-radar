@@ -165,6 +165,15 @@ const ProductRatingSystem: React.FC = () => {
     setShowReviewForm(false);
   };
 
+  const handleDeleteReview = (reviewId: string) => {
+    setReviews(reviews.filter(review => review.id !== reviewId));
+  };
+
+  // For demo purposes, we'll assume the current user can delete reviews with customerName "Sarah Johnson"
+  const canDeleteReview = (review: any) => {
+    return review.customerName === "Sarah Johnson";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -276,7 +285,12 @@ const ProductRatingSystem: React.FC = () => {
                   <div className="space-y-6">
                     {sortedReviews.length > 0 ? (
                       sortedReviews.map(review => (
-                        <ReviewCard key={review.id} review={review} />
+                        <ReviewCard 
+                          key={review.id} 
+                          review={review} 
+                          onDelete={handleDeleteReview}
+                          canDelete={canDeleteReview(review)}
+                        />
                       ))
                     ) : (
                       <div className="text-center py-12 bg-white rounded-lg shadow-md">

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import StarRating from './StarRating';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -16,9 +16,11 @@ interface Review {
 
 interface ReviewCardProps {
   review: Review;
+  onDelete?: (reviewId: string) => void;
+  canDelete?: boolean;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, onDelete, canDelete = false }) => {
   const [helpfulCount, setHelpfulCount] = React.useState(review.helpful);
   const [notHelpfulCount, setNotHelpfulCount] = React.useState(review.notHelpful);
   const [userVote, setUserVote] = React.useState<'helpful' | 'not-helpful' | null>(null);
@@ -51,6 +53,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
     }
   };
 
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+      onDelete?.(review.id);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-start justify-between mb-4">
@@ -71,6 +79,15 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
             </div>
           </div>
         </div>
+        {canDelete && (
+          <button
+            onClick={handleDelete}
+            className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors duration-200"
+            title="Delete review"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
       
       <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
