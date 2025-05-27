@@ -742,6 +742,7 @@
         let selectedRating = null;
         let sortBy = 'newest';
         let userVotes = {}; // Track user votes: reviewId -> 'helpful'|'not-helpful'|null
+        let currentUser = null; // Track current user session
 
         // Initialize the app
         function init() {
@@ -938,6 +939,8 @@
         // Render individual review card
         function renderReviewCard(review) {
             const userVote = userVotes[review.id];
+            const canDelete = currentUser && (review.customerName === currentUser || review.canDelete);
+            
             return `
                 <div class="review-card">
                     <div class="review-header">
@@ -954,7 +957,7 @@
                                 </div>
                             </div>
                         </div>
-                        ${review.canDelete ? `
+                        ${canDelete ? `
                             <button class="delete-btn" onclick="deleteReview('${review.id}')" title="Delete review">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M3 6h18m-2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -1020,8 +1023,30 @@
 
         // Delete review
         function deleteReview(reviewId) {
+            const review = sampleReviews.find(r => r.id === reviewId);
+            const canDelete = currentUser && (review.customerName === currentUser || review.canDelete);
+            
+            if (!canDelete) {
+                alert('You can only delete your own reviews.');
+                return;
+            }
+            
             if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
                 sampleReviews = sampleReviews.filter(r => r.id !== reviewId);
+                
+                // Update product's total reviews count
+                const productReviews = sampleReviews.filter(r => r.productId === currentProduct.id);
+                currentProduct.totalReviews = productReviews.length;
+                
+                // Recalculate average rating
+                if (productReviews.length > 0) {
+                    const totalRating = productReviews.reduce((sum, r) => sum + r.rating, 0);
+                    currentProduct.averageRating = totalRating / productReviews.length;
+                } else {
+                    currentProduct.averageRating = 0;
+                }
+                
+                renderProductHeader();
                 renderRatingFilters();
                 renderReviews();
             }
@@ -1104,6 +1129,9 @@
                 return;
             }
             
+            // Set current user for tracking their reviews
+            currentUser = name;
+            
             // Create new review
             const newReview = {
                 id: Date.now().toString(),
@@ -1121,10 +1149,27 @@
             // Add to reviews array
             sampleReviews.unshift(newReview);
             
+            // Update product's total reviews count and average rating
+            const productReviews = sampleReviews.filter(r => r.productId === currentProduct.id);
+            currentProduct.totalReviews = productReviews.length;
+            
+            const totalRating = productReviews.reduce((sum, r) => sum + r.rating, 0);
+            currentProduct.averageRating = totalRating / productReviews.length;
+            
+            // Update the main products array
+            const productIndex = sampleProducts.findIndex(p => p.id === currentProduct.id);
+            if (productIndex !== -1) {
+                sampleProducts[productIndex] = { ...currentProduct };
+            }
+            
             // Hide form and refresh views
             hideReviewForm();
+            renderProductHeader();
             renderRatingFilters();
             renderReviews();
+            
+            // Show success message
+            alert(`Thank you ${name}! Your review has been submitted successfully.`);
         }
 
         // Event listeners
@@ -1135,3 +1180,4 @@
     </script>
 </body>
 </html>
+```
